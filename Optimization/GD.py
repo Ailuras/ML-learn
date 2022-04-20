@@ -1,62 +1,71 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class gradientDescent:
-    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=0.0001, alpha=1, x1=4, x2=4):
+    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=1e-10, alpha=1, n=7):
         self.mu = mu
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
         self.alpha = alpha
-        self.x = np.array([[x1], [x2]])
+        self.n = n
+        self.y = []
+        self.d = []
+        self.x = np.array([0.0 for i in range(n)]).reshape((-1,1))
+        print('n为%d'%(n))
     
     def solve(self):
         x = self.x
         flag = True
-        index = 0
+        self.index = 0
         while flag:
-        # for i in range(10):
-            x1 = x[0, 0]
-            x2 = x[1, 0]
-            f1 = x1**2 + 3*x2**2 - 4*x1 - 2*x1*x2
-            # f1 = x1*x1 + x2*x2
-            
-            d1 = 2*x1 - 4 - 2*x2
-            d2 = 6*x2 - 2*x1
-            # d1 = 2*x1
-            # d2 = 2*x2
-            
-            f_der = np.array([[d1], [d2]])
+            f1 = 0.0
+            for i in range(self.n-1):
+                f1 += (1-x[i, 0])**2 + 100*(x[i+1, 0]-x[i, 0]**2)**2   
+            f_der = np.array([0.0 for _ in range(self.n)]).reshape((-1,1))
+            for i in range(self.n-1):
+                f_der[i, 0] += 2*(x[i, 0]-1) - 400*x[i, 0]*(x[i+1, 0]-x[i, 0]**2)
+                f_der[i+1, 0] += 200*(x[i+1, 0]-x[i, 0]**2)
+            self.index += 1
+            self.y.append(f1)
+            self.d.append(np.linalg.norm(f_der))
+            if np.linalg.norm(f_der) < self.epsilon:
+                flag = False
+
             d = -f_der
             alpha = self.alpha
             while True:
                 y = x + alpha*d
-                # print(y)
-                y1 = y[0, 0]
-                y2 = y[1, 0]
-                f2 = y1**2 + 3*y2**2 - 4*y1 - 2*y1*y2
-                # f2 = y1*y1 + y2*y2
+                f2 = 0.0
+                for i in range(self.n-1):
+                    f2 += (1-y[i, 0])**2 + 100*(y[i+1, 0]-y[i, 0]**2)**2
                 
                 temp = -alpha*np.dot(f_der.T, d)
                 if temp*self.mu > f1-f2:
+                    # print(alpha)
                     alpha = alpha*self.beta1
                     continue
                 elif temp*(1-self.mu) < f1-f2:
+                    # print(alpha)
                     alpha = alpha*self.beta2
                     continue
                 else:
-                    if abs(f1-f2) < self.epsilon:
-                        flag = False
                     break
-            index += 1
-            # print('第%d次迭代:'%(index))
-            # print(x)
-            # print(alpha)
-            # print(d)
             x = x + alpha*d
-        print('经历%d次迭代后收敛'%(index))
+        print('经历%d次迭代后收敛'%(self.index))
         return x
+    def show(self):
+        x = range(self.index)
+        y = self.y
+        plt.plot(x, y, label="Train_Loss_list")
+        plt.show()
+        x = range(self.index)
+        y = self.d
+        plt.plot(x, y, label="Train_Loss_list")
+        plt.show()
 
 if __name__ == '__main__':
     a = gradientDescent()
     x = a.solve()
     print(x)
+    a.show()

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class newtonMethod:
-    def __init__(self, mu=0.3, beta=0.8, epsilon=1e-10, alpha=1, n=2):
+    def __init__(self, mu=0.3, beta=0.8, epsilon=1e-5, alpha=1, n=7):
         self.mu = mu
         self.beta = beta
         self.epsilon = epsilon
@@ -90,5 +90,5 @@ if __name__ == '__main__':
     a = newtonMethod()
     x = a.solve()
     print(x)
-    # a.show()
-    a.draw()
+    a.show()
+    # a.draw()

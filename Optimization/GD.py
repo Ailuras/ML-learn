@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class gradientDescent:
-    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=1e-10, alpha=1, n=2):
+    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=1e-5, alpha=1, n=7):
         self.mu = mu
         self.beta1 = beta1
         self.beta2 = beta2
@@ -88,5 +88,5 @@ if __name__ == '__main__':
     a = gradientDescent()
     x = a.solve()
     print(x)
-    # a.show()
-    a.draw()
+    a.show()
+    # a.draw()

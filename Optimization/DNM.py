@@ -1,18 +1,23 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class newtonMethod:
-    def __init__(self, mu=0.3, beta=0.8, epsilon=1e-10, alpha=1, n=7):
+    def __init__(self, mu=0.3, beta=0.8, epsilon=1e-10, alpha=1, n=2):
         self.mu = mu
         self.beta = beta
         self.epsilon = epsilon
         self.alpha = alpha
         self.n = n
+        self.y = []
+        self.d = []
+        self.x1 = []
+        self.x2 = []
         self.x = np.array([0.0 for i in range(n)]).reshape((-1,1))
         print('n为%d'%(n))
     
     def solve(self):
         x = self.x
-        index = 0
+        self.index = 0
         while True:
             f1 = 0.0
             for i in range(self.n-1):
@@ -23,7 +28,12 @@ class newtonMethod:
                 f_der1[i, 0] += 2*(x[i, 0]-1) - 400*x[i, 0]*(x[i+1, 0]-x[i, 0]**2)
                 f_der1[i+1, 0] += 200*(x[i+1, 0]-x[i, 0]**2)
                 
-            index += 1
+            self.index += 1
+            self.y.append(f1)
+            self.d.append(np.linalg.norm(f_der1))
+            if self.n == 2:
+                self.x1.append(x[0, 0])
+                self.x2.append(x[1, 0])
             if np.linalg.norm(f_der1) < self.epsilon:
                 break
             
@@ -48,12 +58,37 @@ class newtonMethod:
                     continue
                 else:
                     break
-                
             x = x + alpha*d
-        print('经历%d次迭代后收敛'%(index))
+        print('经历%d次迭代后收敛'%(self.index))
         return x
+    def show(self):
+        x = range(self.index)
+        y = self.y
+        plt.plot(x, y, label="Train_Loss_list")
+        plt.show()
+        x = range(self.index)
+        y = self.d
+        plt.plot(x, y, label="Train_Loss_list")
+        plt.show()
+        
+    def draw(self):
+        def f(x, y):
+            return (1-x)**2 + 100*(y-x**2)**2
+        # plt.figure(figsize=(1000, 1000))
+        n = 4096
+        x = np.linspace(-2, 2, n)
+        y = np.linspace(-2, 2, n)
+
+        X, Y = np.meshgrid(x, y)
+
+        plt.contourf(X, Y, f(X, Y))
+        plt.plot(self.x1, self.x2)
+        plt.scatter(self.x1, self.x2, color='r', s=1)
+        plt.show()
 
 if __name__ == '__main__':
     a = newtonMethod()
     x = a.solve()
     print(x)
+    # a.show()
+    a.draw()

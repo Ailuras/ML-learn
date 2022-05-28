@@ -4,10 +4,11 @@ import itertools
 import random
 
 class SGD:
-    def __init__(self, dataFile='Data/wine/wine.data', beta=1000, alpha=0.01, gama=0.5, epsilon=0.0001, times=1500, bench_size=30):
+    def __init__(self, dataFile='Data/wine/wine.data', beta1=1000000, beta2=1000000, alpha=0.000001, gama=0.5, epsilon=0.0001, times=1500, bench_size=500):
         self.dataFile = dataFile
         self.data = []
-        self.beta = beta
+        self.beta1 = beta1
+        self.beta2 = beta2
         self.alpha = alpha
         self.times = times
         self.gama = gama
@@ -26,18 +27,26 @@ class SGD:
         for i in range(1, 14):
             data[:, i] = (data[:, i] - np.mean(data[:, i]))/ np.std(data[:, i])
         self.data = list(itertools.product(data, repeat=2))
+        self.num = len(self.data)
         
-    def get_error(self, M):
-        error = 0
+    def get_loss(self, M):
+        total = 0
         for x_i, x_j in self.data:
+            loss = 0
+            diff = x_i[1:]-x_j[1:]
+            diff = np.mat(diff)
+            dist = np.dot(np.dot(diff, self.M), diff.T)
             if x_i[0] == x_j[0]:
-                temp = x_i[1:]-x_j[1:]
-                temp = np.mat(temp)
-                error += np.dot(np.dot(temp, M), temp.T)
-        return error
+                loss += dist
+            elif dist < 1:
+                loss += self.beta1 * (1-dist)
+            if dist < 0:
+                loss -= self.beta2 * dist
+            total += loss/self.num
+        return total
     
     def solve(self):
-        error = self.get_error(self.M)
+        error = self.get_loss(self.M)
         for _ in range(self.times):
             data = random.sample(self.data, self.bench_size)
             delta_M = np.zeros([13, 13])
@@ -46,25 +55,22 @@ class SGD:
                 temp = np.mat(temp)
                 if x_i[0] == x_j[0]:
                     delta_M += np.dot(temp.T, temp)
-                elif np.dot(np.dot(temp, self.M), temp.T) > 1:
-                    delta_M += self.beta*np.dot(temp.T, temp)
+                elif np.dot(np.dot(temp, self.M), temp.T) < 1:
+                    delta_M -= self.beta1*np.dot(temp.T, temp)
                 if np.dot(np.dot(temp, self.M), temp.T) < 0:
-                    delta_M += self.beta*np.dot(temp.T, temp)
+                    delta_M -= self.beta2*np.dot(temp.T, temp)
             
             alpha = self.alpha
-            M_new = self.M-alpha*delta_M
+            self.M = self.M-alpha*delta_M
             
-            while self.get_error((M_new+M_new.T)/2) < 0:
-                alpha *= self.gama
-                M_new = self.M-alpha*delta_M
-            self.M = (M_new+M_new.T)/2
-            error = self.get_error(self.M)
+            # self.M = (M_new+M_new.T)/2
+            error = self.get_loss(self.M)
             print(error)
             if error < self.epsilon:
                 return
-            print(np.linalg.eigvals(self.M))
-            # if not (np.linalg.eigvals(self.M) >= 0).all():
-            #     print('不正定')
+            # print(np.linalg.eigvals(self.M))
+            if not (np.linalg.eigvals((self.M+self.M.T)/2) >= 0).all():
+                print('不正定')
     
     def test(self):
         self.data = []
@@ -72,8 +78,8 @@ class SGD:
         # print(np.linalg.eigvals(self.M+self.M.T))
         # if not (np.linalg.eigvals(self.M) >= 0).all():
         #     print('不正定')
-        print(self.get_error(self.M))
-            
+        print(self.get_loss(self.M))
+        
 if __name__ == '__main__':
     a = SGD()
     a.solve()

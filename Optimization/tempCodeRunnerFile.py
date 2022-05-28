@@ -1,1 +1,0 @@
-print(np.matrix(a, a.T))

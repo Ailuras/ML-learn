@@ -4,13 +4,14 @@ import itertools
 import random
 
 class SGD:
-    def __init__(self, dataFile='Data/wine/wine.data', beta1=1000000, beta2=1000000, alpha=0.000001, gama=0.5, epsilon=0.0001, times=1500, bench_size=500):
+    def __init__(self, dataFile='Data/wine/wine.data', beta1=1000000, beta2=10000000, alpha=0.000001, gama=0.5, epsilon=0.0001, times=1500, bench_size=500):
         self.dataFile = dataFile
         self.data = []
         self.beta1 = beta1
         self.beta2 = beta2
         self.alpha = alpha
         self.times = times
+        self.value = []
         self.gama = gama
         self.epsilon = epsilon
         self.bench_size = bench_size
@@ -65,23 +66,22 @@ class SGD:
             
             # self.M = (M_new+M_new.T)/2
             error = self.get_loss(self.M)
+            self.value.append(error)
             print(error)
             if error < self.epsilon:
                 return
-            # print(np.linalg.eigvals(self.M))
-            if not (np.linalg.eigvals((self.M+self.M.T)/2) >= 0).all():
-                print('不正定')
+
+            
     
-    def test(self):
-        self.data = []
-        self.get_info('Data/wine/wine_test.data')
-        # print(np.linalg.eigvals(self.M+self.M.T))
-        # if not (np.linalg.eigvals(self.M) >= 0).all():
-        #     print('不正定')
-        print(self.get_loss(self.M))
+    def draw(self):
+        x = range(self.times)
+        y = self.value
+        plt.plot(x, y, label="Train_Loss_list")
+        plt.savefig('Train_Loss_list.png')
+        plt.show()
         
 if __name__ == '__main__':
     a = SGD()
     a.solve()
-    a.test()
+    a.draw()
     

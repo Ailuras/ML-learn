@@ -6,11 +6,12 @@ import random
 import math
 
 class SAG:
-    def __init__(self, dataFile='Data/covtype/covtype.libsvm.binary.scale', alpha=0.000001, epsilon=0.1, times=100000, features=54, size=10000):
+    def __init__(self, dataFile='../Data/covtype/covtype.libsvm.binary.scale', alpha=0.00001, epsilon=0.1, times=1000000, features=54, bench_size=30, size=10000):
         self.dataFile = dataFile
         self.alpha = alpha
         self.times = times
         self.epsilon = epsilon
+        self.bench_size = bench_size
         self.features = features+1
         self.value1 = []
         self.value2 = []
@@ -86,37 +87,34 @@ class SAG:
         d = np.zeros((1, self.features))
         g = []
         gradient = np.zeros((self.size, self.features))
-        len = self.y_train.shape[0]
-        # for i in tqdm(range(self.times)):
-        for i in range(self.times):
+        len = self.y_test.shape[0]
+        for i in tqdm(range(self.times)):
+        # for i in range(self.times):
             index = random.randint(0, len-1)
             g = self.get_gradient(index)
             d = d-gradient[index]+g
             gradient[index] = g
             self.omega -= self.alpha/len * d
             
-            loss1 = self.get_loss(1)
-            print(loss1)
-            self.value1.append(loss1)
-            loss2 = self.get_loss(2)
-            self.value2.append(loss2)
+            
+            if i%1000 == 0:
+                loss1 = self.get_loss(1)
+                # print(loss1)
+                self.value1.append(loss1)
+                loss2 = self.get_loss(2)
+                self.value2.append(loss2)
         
     def draw(self):
-        x = range(self.times)
+        x = range(0, self.times, 1000)
         y1 = self.value1
         y2 = self.value2
+        plt.title('Train_Loss_list')
         plt.plot(x, y1, label="Train_Loss_list")
         plt.show()
+        plt.title('Test_Loss_list')
         plt.plot(x, y2, label="Test_Loss_list")
         plt.show()
-    
-    def test(self):
-        d = np.zeros((1 ,self.features))
-        gradient = np.zeros((self.size, self.features))
-        g = self.get_gradient(0)
-        print(g)
-        d = d-gradient[0]+g
-        print(d)
+
             
 if __name__ == '__main__':
     a = SAG()

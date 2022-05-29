@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class gradientDescent:
-    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=1e-5, alpha=1, n=7):
+    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=0.01, alpha=0.001, n=2):
         self.mu = mu
         self.beta1 = beta1
         self.beta2 = beta2
@@ -39,24 +39,28 @@ class gradientDescent:
 
             d = -f_der
             alpha = self.alpha
-            while True:
-                y = x + alpha*d
-                f2 = 0.0
-                for i in range(self.n-1):
-                    f2 += (1-y[i, 0])**2 + 100*(y[i+1, 0]-y[i, 0]**2)**2
+            # while True:
+            #     y = x + alpha*d
+            #     f2 = 0.0
+            #     for i in range(self.n-1):
+            #         f2 += (1-y[i, 0])**2 + 100*(y[i+1, 0]-y[i, 0]**2)**2
                 
-                temp = -alpha*np.dot(f_der.T, d)
-                if temp*self.mu > f1-f2:
-                    # print(alpha)
-                    alpha = alpha*self.beta1
-                    continue
-                elif temp*(1-self.mu) < f1-f2:
-                    # print(alpha)
-                    alpha = alpha*self.beta2
-                    continue
-                else:
-                    break
+            #     temp = -alpha*np.dot(f_der.T, d)
+            #     if temp*self.mu > f1-f2:
+            #         # print(alpha)
+            #         alpha = alpha*self.beta1
+            #         continue
+            #     elif temp*(1-self.mu) < f1-f2:
+            #         # print(alpha)
+            #         alpha = alpha*self.beta2
+            #         continue
+            #     else:
+            #         break
+            print(d)
+            if self.index > 40:
+                break
             x = x + alpha*d
+            # print(f_der)
         print('经历%d次迭代后收敛'%(self.index))
         return x
     def show(self):
@@ -88,5 +92,5 @@ if __name__ == '__main__':
     a = gradientDescent()
     x = a.solve()
     print(x)
-    a.show()
+    # a.show()
     # a.draw()

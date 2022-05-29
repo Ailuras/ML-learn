@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Momentum:
-    def __init__(self, mu=0.3, beta=0.9, epsilon=1e-5, alpha=1, n=2):
+    def __init__(self, mu=0.3, gamma=0.8, eta=0.002, epsilon=0.01, n=2):
         self.mu = mu
-        self.beta = beta
+        self.gamma = gamma
+        self.eta = eta
         self.epsilon = epsilon
-        self.alpha = alpha
         self.n = n
         self.y = []
         self.d = []
@@ -19,7 +19,7 @@ class Momentum:
         x = self.x
         flag = True
         self.index = 0
-        d = 0
+        d = np.array([0.0 for _ in range(self.n)]).reshape((-1,1))
         while flag:
             f1 = 0.0
             for i in range(self.n-1):
@@ -36,37 +36,41 @@ class Momentum:
                 self.x2.append(x[1, 0])
             if np.linalg.norm(f_der) < self.epsilon:
                 flag = False
-
-            d = self.beta*d + (1-self.beta)*f_der
-            x = x - self.alpha*d
+                                
+            d = self.gamma*d-self.eta*f_der
+            x = x + d
         print('经历%d次迭代后收敛'%(self.index))
         return x
+
+    # 用于第三题画图
     def show(self):
         x = range(self.index)
         y = self.y
+        plt.title('Train_Loss_list')
         plt.plot(x, y, label="Train_Loss_list")
         plt.show()
         x = range(self.index)
         y = self.d
+        plt.title('Train_gradient_list')
         plt.plot(x, y, label="Train_gradient_list")
         plt.show()
-        
+    
+    # 用于第二题画图
     def draw(self):
-        def f(x, y):
-            return (1-x)**2 + 100*(y-x**2)**2
-        # plt.figure(figsize=(1000, 1000))
-        n = 4096
-        x = np.linspace(-2, 2, n)
-        y = np.linspace(-2, 2, n)
-
+        step = 0.5
+        x = np.arange(0, 2, step)
+        y = np.arange(0, 2, step)
         X, Y = np.meshgrid(x, y)
-
-        plt.contourf(X, Y, f(X, Y))
+        Z = (1-X)**2 + 100*(Y-X**2)**2
+        plt.figure(figsize=(6, 6))
+        plt.contour(X, Y, Z, 50)
+        
         plt.plot(self.x1, self.x2)
-        plt.scatter(self.x1, self.x2, color='r', s=1)
+        plt.scatter(self.x1, self.x2, color='r', s=3)
         plt.show()
 
 if __name__ == '__main__':
     a = Momentum()
     x = a.solve()
     print(x)
+    a.draw()

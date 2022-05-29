@@ -2,10 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Momentum:
-    def __init__(self, mu=0.3, beta1=0.8, beta2=1.5, epsilon=1e-5, alpha=1, n=7):
+    def __init__(self, mu=0.3, beta=0.9, epsilon=1e-5, alpha=1, n=2):
         self.mu = mu
-        self.beta1 = beta1
-        self.beta2 = beta2
+        self.beta = beta
         self.epsilon = epsilon
         self.alpha = alpha
         self.n = n
@@ -20,6 +19,7 @@ class Momentum:
         x = self.x
         flag = True
         self.index = 0
+        d = 0
         while flag:
             f1 = 0.0
             for i in range(self.n-1):
@@ -37,26 +37,8 @@ class Momentum:
             if np.linalg.norm(f_der) < self.epsilon:
                 flag = False
 
-            d = -f_der
-            alpha = self.alpha
-            while True:
-                y = x + alpha*d
-                f2 = 0.0
-                for i in range(self.n-1):
-                    f2 += (1-y[i, 0])**2 + 100*(y[i+1, 0]-y[i, 0]**2)**2
-                
-                temp = -alpha*np.dot(f_der.T, d)
-                if temp*self.mu > f1-f2:
-                    # print(alpha)
-                    alpha = alpha*self.beta1
-                    continue
-                elif temp*(1-self.mu) < f1-f2:
-                    # print(alpha)
-                    alpha = alpha*self.beta2
-                    continue
-                else:
-                    break
-            x = x + alpha*d
+            d = self.beta*d + (1-self.beta)*f_der
+            x = x - self.alpha*d
         print('经历%d次迭代后收敛'%(self.index))
         return x
     def show(self):
@@ -66,7 +48,7 @@ class Momentum:
         plt.show()
         x = range(self.index)
         y = self.d
-        plt.plot(x, y, label="Train_Loss_list")
+        plt.plot(x, y, label="Train_gradient_list")
         plt.show()
         
     def draw(self):
@@ -88,5 +70,3 @@ if __name__ == '__main__':
     a = Momentum()
     x = a.solve()
     print(x)
-    # a.show()
-    # a.draw()
